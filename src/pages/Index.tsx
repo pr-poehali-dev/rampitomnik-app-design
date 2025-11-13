@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -96,6 +97,15 @@ const plants: Plant[] = [
 const Index = () => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [activeSection, setActiveSection] = useState<string>("catalog");
+  const [user, setUser] = useState<any>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      setUser(JSON.parse(userData));
+    }
+  }, []);
 
   const addToCart = (plant: Plant) => {
     setCart((prev) => {
@@ -170,7 +180,37 @@ const Index = () => {
             </button>
           </nav>
 
-          <Sheet>
+          <div className="flex items-center gap-3">
+            {user ? (
+              <>
+                <span className="text-sm text-muted-foreground hidden md:block">
+                  {user.full_name}
+                </span>
+                {user.is_admin && (
+                  <Button variant="outline" size="sm" onClick={() => navigate("/admin")}>
+                    <Icon name="Settings" className="h-4 w-4 mr-2" />
+                    Админ
+                  </Button>
+                )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    localStorage.removeItem("user");
+                    localStorage.removeItem("token");
+                    setUser(null);
+                  }}
+                >
+                  <Icon name="LogOut" className="h-4 w-4" />
+                </Button>
+              </>
+            ) : (
+              <Button variant="outline" size="sm" onClick={() => navigate("/login")}>
+                <Icon name="User" className="h-4 w-4 mr-2" />
+                Вход
+              </Button>
+            )}
+            <Sheet>
             <SheetTrigger asChild>
               <Button variant="outline" size="icon" className="relative">
                 <Icon name="ShoppingCart" className="h-5 w-5" />
@@ -246,6 +286,7 @@ const Index = () => {
               )}
             </SheetContent>
           </Sheet>
+          </div>
         </div>
       </header>
 
